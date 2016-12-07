@@ -1,8 +1,8 @@
 {
   "name": "gitbook-start-team-noejaco2017-4.0",
-  "version": "0.0.9",
-  "description": "Despliegue con pluign Iaas",
-  "main": "./bin/linea-comando-npm.js",
+  "version": "0.0.1",
+  "description": "Despliegue con pluign Localstrategy wtih Heroku & dropbox",
+  "main": "gitbook-start-heroku-drop.js",
   "scripts": {
     "generate-gitbook": "./scripts/losh generate-gitbook",
     "generate-wiki": "./scripts/losh generate-wiki",
@@ -15,7 +15,7 @@
     "ssh": "./ssh pull-iaas"
   },
   "bin": {
-    "gitbook-start": "./bin/linea-comando-npm.js"
+    "gitbook-start": "gitbook-start-heroku-drop.js"
   },
   "repository": {
     "type": "git",

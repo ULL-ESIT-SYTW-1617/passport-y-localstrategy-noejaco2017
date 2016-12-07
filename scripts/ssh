@@ -1,5 +1,0 @@
-#!/bin/sh
-echo "Abriendo script ssh pull"
-CMDDESC='Genera pull a la maquina iaas'
-
-ssh -t usuario@10.6.128.18 'cd /home/usuario/sytw/practica-despliegues-en-iaas-y-heroku-noejaco2017;git pull origin master'

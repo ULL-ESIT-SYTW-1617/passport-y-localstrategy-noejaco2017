@@ -1,4 +1,4 @@
-# Práctica: Autenticación OAuth con Passport
+# Práctica: Localstrategy with dropbox
 
 
 ![imagen1][logo]
