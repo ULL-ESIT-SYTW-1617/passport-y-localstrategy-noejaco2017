@@ -1,6 +1,6 @@
 {
   "name": "gitbook-start-heroku-localstrategy-noejaco17",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Despliegue con pluign Localstrategy with Heroku & dropbox",
   "main": "gitbook-start-heroku-drop.js",
   "scripts": {
