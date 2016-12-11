@@ -33,6 +33,10 @@ function initialize(directorio) {
         if(err)
         console.log(err);
      });
+     fs.copyDir(path.join(process.cwd(),'node_modules','gitbook-start-heroku-localstrategy-noejaco17','public'),path.join(process.cwd()+"/"+directorio, 'public'),function(err){
+       if(err)
+       console.log(err);
+    });
 
     //  fs.copyDir(path.join(process.cwd(),'node_modules','gitbook-start-heroku-token-oauth-noejaco17','public'),path.join(process.cwd(), 'public'),function(err){
     //     if(err)
@@ -118,7 +122,6 @@ function datos_usuario_token(directorio){
             fs.writeFileSync(path.join(process.cwd(),".dropbox.json"),dropbox_config);
 
             var token = require(path.join(process.cwd(), ".token_heroku","token.json"));
-            var pack= require(path.join(process.cwd(), 'package.json'));
 
             var her = new heroku({ token : token.Heroku.token_app });
 
