@@ -110,12 +110,12 @@ function datos_usuario_token(directorio){
 
             //variable con el contenido de config.json
             var heroku_config = '{\n "Heroku":{\n\t"nombre_app": "'+result.nombre_app+'",\n\t "token_app": "'+result.token_app+'"\n\t}\n}';
-            var dropbox_config = '{\n "Config":{\n\t"token_dropbox": "'+result.nombre_app+'",\n\t "ruta_dropbox": "'+result.id_client+'",\n\t "secret_client": "'+result.secret_client+'",\n\t "organizacion": "'+result.organizacion+'"\n\t}\n}';
+            var dropbox_config = '{\n "Config":{\n\t"token_dropbox": "'+result.nombre_app+'",\n\t "ruta_dropbox": "'+result.ruta_dropbox+'"\n\t}\n}';
 
 
             fs.mkdirSync(path.join(process.cwd(), ".token_heroku"));
             fs.writeFileSync(path.join(process.cwd(),".token_heroku","token.json"),heroku_config);
-            fs.writeFileSync(path.join(process.cwd()+"/"+directorio,"aplicacion.json"),dropbox_config);
+            fs.writeFileSync(path.join(process.cwd()+"/"+directorio,"dropbox.json"),dropbox_config);
 
             var token = require(path.join(process.cwd(), ".token_heroku","token.json"));
             var pack= require(path.join(process.cwd(), 'package.json'));
