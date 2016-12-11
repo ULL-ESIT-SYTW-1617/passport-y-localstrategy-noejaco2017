@@ -8,7 +8,7 @@
 ## Descripción de la práctica
 
 ### Objetivo:
-El servidor proveído por el plugin (sea iaaso heroku) deberá autenticar que el lector del libro pertenece a una organización dada de GitHub (por ejemplo ULL-ESIT-SYTW-1617). Si es el caso que pertenece podrá seguir leyendo el libro, sino será redirigido a la ruta de autenticación.
+El servidor proveído por el plugin (sea iaas o heroku) deberá autenticar que el lector del libro pertenece a una organización dada de GitHub (por ejemplo ULL-ESIT-SYTW-1617). Si es el caso que pertenece podrá seguir leyendo el libro, sino será redirigido a la ruta de autenticación.
 
 Puede partir de los repos de los plugins que ha usado en prácticas anteriores o crear unos nuevos
 
@@ -16,7 +16,7 @@ Puede partir de los repos de los plugins que ha usado en prácticas anteriores o
 ### Pasos a seguir:
 
 #### Instalación del plugin
-Para ello nos serviremos del paquete [npm-gitbook-start](https://www.npmjs.com/package/gitbook-start-team-noejaco2017-2.0) y seguiremos las instrucciones indicadas.
+Para ello nos serviremos del paquete [gitbook-start](https://github.com/ULL-ESIT-SYTW-1617/gitbook-start-heroku-noejaco2017) y seguiremos las instrucciones indicadas.
 
 Una vez finalizado este paso, tendremos un servidor Express desplegado en la IP indicada así como nuevas tareas añadidas al fichero __gulpfile.js__.
 #### Paquetes necesarios
