@@ -24,12 +24,12 @@ function initialize(directorio) {
     //       console.log(err);
     //     });
     //Copia el server.js
-    fs_extended.copyFile(path.join(process.cwd(),'node_modules','gitbook-start-heroku-token-oauth-noejaco17','app.js'),path.join(process.cwd()+"/"+directorio, 'app.js'),function(err){
+    fs_extended.copyFile(path.join(process.cwd(),'node_modules','gitbook-start-heroku-localstrategy-noejaco17','app.js'),path.join(process.cwd()+"/"+directorio, 'app.js'),function(err){
         if(err)
         console.log(err);
      });
 
-      fs.copyDir(path.join(process.cwd(),'node_modules','gitbook-start-heroku-token-oauth-noejaco17','views'),path.join(process.cwd()+"/"+directorio, 'views'),function(err){
+      fs.copyDir(path.join(process.cwd(),'node_modules','gitbook-start-heroku-localstrategy-noejaco17','views'),path.join(process.cwd()+"/"+directorio, 'views'),function(err){
         if(err)
         console.log(err);
      });
@@ -47,7 +47,7 @@ function initialize(directorio) {
 
 
     });
-    fs_extended.copyFile(path.join(process.cwd(),'node_modules','gitbook-start-heroku-token-oauth-noejaco17','Procfile'),path.join(process.cwd()+"/"+directorio, 'Procfile'),function(err){
+    fs_extended.copyFile(path.join(process.cwd(),'node_modules','gitbook-start-heroku-localstrategy-noejaco17','Procfile'),path.join(process.cwd()+"/"+directorio, 'Procfile'),function(err){
         if(err)
         console.log(err);
      });
@@ -91,51 +91,44 @@ function datos_usuario_token(directorio){
               name: 'token_app',
               required: true
             },{
-                name: 'repositorio'
-            },{
-                name: 'id_client',
+                name: 'token_dropbox',
                 require: true
             },{
-                name: 'secret_client',
-                require: true
-
-            },{
-                name: 'organizacion',
+                name: 'ruta_dropbox',
                 require: true
 
             }], function (err, result) {
             //
             // Log the results.
             //
-            console.log('Sus datos son:');
             console.log('  nombre: ' + result.nombre_app);
             console.log('  token: ' + result.token_app);
-            console.log('  repositorio: ' + result.repositorio);
-            console.log('  id_client: ' + result.id_client);
-            console.log('  secret_client: ' + result.secret_client);
-            console.log('  organizacion ' + result.organizacion);
+            console.log('  token_dropbox: ' + result.token_dropbox);
+            console.log('  ruta_dropbox: ' + result.ruta_dropbox);
+            // console.log('  secret_client: ' + result.secret_client);
+            // console.log('  organizacion ' + result.organizacion);
 
             //variable con el contenido de config.json
-            var json = '{\n "Heroku":{\n\t"nombre_app": "'+result.nombre_app+'",\n\t "token_app": "'+result.token_app+'"\n\t}\n}';
-            var configuracion = '{\n "Config":{\n\t"nombre_app": "'+result.nombre_app+'",\n\t "id_client": "'+result.id_client+'",\n\t "secret_client": "'+result.secret_client+'",\n\t "organizacion": "'+result.organizacion+'"\n\t}\n}';
+            var heroku_config = '{\n "Heroku":{\n\t"nombre_app": "'+result.nombre_app+'",\n\t "token_app": "'+result.token_app+'"\n\t}\n}';
+            var dropbox_config = '{\n "Config":{\n\t"token_dropbox": "'+result.nombre_app+'",\n\t "ruta_dropbox": "'+result.id_client+'",\n\t "secret_client": "'+result.secret_client+'",\n\t "organizacion": "'+result.organizacion+'"\n\t}\n}';
 
 
             fs.mkdirSync(path.join(process.cwd(), ".token_heroku"));
-            fs.writeFileSync(path.join(process.cwd(),".token_heroku","token.json"),json);
-            fs.writeFileSync(path.join(process.cwd()+"/"+directorio,"aplicacion.json"),configuracion);
+            fs.writeFileSync(path.join(process.cwd(),".token_heroku","token.json"),heroku_config);
+            fs.writeFileSync(path.join(process.cwd()+"/"+directorio,"aplicacion.json"),dropbox_config);
 
             var token = require(path.join(process.cwd(), ".token_heroku","token.json"));
             var pack= require(path.join(process.cwd(), 'package.json'));
 
             var her = new heroku({ token : token.Heroku.token_app });
 
-                her.post('/apps', {body: {name: token.Heroku.nombre_app}} ).then(app => {
+                //her.post('/apps', {body: {name: token.Heroku.nombre_app}} ).then(app => {
 
                     //git.init().addRemote('heroku', result.repositorio).add('.').commit('Primer commit').push('heroku','master');
 
 
 
-                });
+                //});
 
           });
 
