@@ -15,8 +15,8 @@ function initialize(directorio) {
     console.log("\n============ Generando tarea gulp ============")
     console.log("\nEspere mientras el proceso termina ...")
 
-    var contenido = `gulp.task("deploy-heroku-oauth" ,function(){
-            var heroku = require("gitbook-start-heroku-token-oauth-noejaco17");
+    var contenido = `gulp.task("push-heroku" ,function(){
+            var heroku = require("gitbook-start-heroku-localstrategy-noejaco17");
             heroku.deploy();
      });`;
     //  fs.copyFile(path.join(__dirname,'..','book.json'),"./" + directorio + "/book.json",function(err){

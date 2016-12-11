@@ -101,7 +101,7 @@ passport.deserializeUser(function(user, done) {
 //     });
 //   }));
 
-// mongoose.connect('mongodb://localhost/lista', function(err, res) {  
+// mongoose.connect('mongodb://localhost/lista', function(err, res) {
 //       if(err) {
 //           console.log('ERROR: connecting to Database. ' + err);
 //   }});
@@ -109,61 +109,60 @@ passport.deserializeUser(function(user, done) {
 
 
 
-var User = require('./models/bbdd.js');
 
 passport.use(new LocalStrategy(function(username, password, done) {
 process.nextTick(function() {
     //   // Auth Check Logic
       console.log("LLEGAMOS A LA FUNCION LOCAL");
-      console.log("USERNAME"+username);
-      console.log("PASS"+password);
-       //console.log("USER"+User+"\n");
-      
-      // Buscamos por el email para ver si existe
-      
-        User.findOne({ 'email' :  username }, function(err, user) {
-          console.log("Usuario dentro de findone: "+user);
-          // console.log("Entramos a buscar usuario -> "+ user.email || '');
-          //   console.log("Entramos a buscar usuario y su password en mongo es -> "+ user.password || '');
-            if (err){
-              console.log("Ha ocurrido un error");
-                return done(err);
-            }
-            // check to see if theres already a user with that email
-            if (!user) {
-              // return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
-              console.log("EL USUARIO NO EXISTE EN MONGO");
-                    // else {
-      
-                  //   //Creamos un nuevo usuario
-                  //     var newUser = new User();
-      
-                    
-                  //     newUser.email = username;
-                  //     newUser.password = newUser.generateHash(password);//Generamos la contraseña con bcryptnodejs
-      
-                  //     // save the user
-                  //     newUser.save(function(err) {
-                  //         if (err)
-                  //             throw err;
-                  //         return done(null, newUser);
-                  //     });
-                  // }
-              return done(null,false);
-              
-            }
-            // var ra=  bcrypt.compareSync(password, user.password);;
-            // console.log("RA"+ra);
-            // console.log("PASSWORD "+password);
-            if (!user.validPassword(password)) {
-              console.log("LA CONTRASEÑA NO COINCIDE");
-              return done(null, false);
-            }
-          console.log("EL USUARIO EXISTE Y TODO HA IDO CORRECTO");
-          return done(null, user);
-        });
-      
-    });
+    //   console.log("USERNAME"+username);
+    //   console.log("PASS"+password);
+    //    //console.log("USER"+User+"\n");
+    //
+    //   // Buscamos por el email para ver si existe
+    //
+    //     User.findOne({ 'email' :  username }, function(err, user) {
+    //       console.log("Usuario dentro de findone: "+user);
+    //       // console.log("Entramos a buscar usuario -> "+ user.email || '');
+    //       //   console.log("Entramos a buscar usuario y su password en mongo es -> "+ user.password || '');
+    //         if (err){
+    //           console.log("Ha ocurrido un error");
+    //             return done(err);
+    //         }
+    //         // check to see if theres already a user with that email
+    //         if (!user) {
+    //           // return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
+    //           console.log("EL USUARIO NO EXISTE EN MONGO");
+    //                 // else {
+    //
+    //               //   //Creamos un nuevo usuario
+    //               //     var newUser = new User();
+    //
+    //
+    //               //     newUser.email = username;
+    //               //     newUser.password = newUser.generateHash(password);//Generamos la contraseña con bcryptnodejs
+    //
+    //               //     // save the user
+    //               //     newUser.save(function(err) {
+    //               //         if (err)
+    //               //             throw err;
+    //               //         return done(null, newUser);
+    //               //     });
+    //               // }
+    //           return done(null,false);
+    //
+    //         }
+    //         // var ra=  bcrypt.compareSync(password, user.password);;
+    //         // console.log("RA"+ra);
+    //         // console.log("PASSWORD "+password);
+    //         if (!user.validPassword(password)) {
+    //           console.log("LA CONTRASEÑA NO COINCIDE");
+    //           return done(null, false);
+    //         }
+    //       console.log("EL USUARIO EXISTE Y TODO HA IDO CORRECTO");
+    //       return done(null, user);
+    //     });
+    //
+     });
 }));
 
 
@@ -191,21 +190,21 @@ app.get('/registro',
 // var password_reg = formulario['password_reg'].value;
 // var username_reg = formulario['username_reg'].value;
 
-app.post('/registro', function(req, res, next){ 
-  
+app.post('/registro', function(req, res, next){
+
   var pssw = req.body.password_reg;
   var name = req.body.username_reg;
-  
+
   ////////////////////
   var newUser = new User();
   newUser.email = name;
   newUser.password = newUser.generateHash(pssw);//Generamos la contraseña con bcryptnodejs
-      
+
   newUser.save(function(err) {
       if (err)
           throw err;
   });
-  
+
   res.redirect('/login');
   ////////////////////
   // var hash = User.userSchema.methods.generateHash(pssw);
@@ -215,15 +214,15 @@ app.post('/registro', function(req, res, next){
   //       "password": hash
 
   //   });
-    
+
   // var user_reg = user_prueba.save(function (err) {
   //   if (err) { console.log(`Hubieron errores al guardar user:\n${err}`); return err; }
   //   console.log(`Usuario guardado desde REGISTRO: ${user_prueba}`);
   // });
-  
-  // Promise.all([user1], [user2]).then( function(value){ 
-  //   console.log(util.inspect(value, {depth: null}));  
-  //   //mongoose.connection.close(); 
+
+  // Promise.all([user1], [user2]).then( function(value){
+  //   console.log(util.inspect(value, {depth: null}));
+  //   //mongoose.connection.close();
   // });
 });
 
@@ -235,7 +234,7 @@ app.post('/registro', function(req, res, next){
 //     })
 // );
 
-app.post('/login', 
+app.post('/login',
   passport.authenticate('local', { failureRedirect: '/login' }),
   function(req, res) {
     //console.log("USHARIOOO"+req.user);
@@ -254,14 +253,14 @@ app.post('/login/password', function(req, res, next) {
   var new_pass = req.body.password_new;
   var new_pass_2 = req.body.password_new_2;
   var name = req.body.username;
-  
+
   console.log("Estamos en /login/password:::\n");
   console.log("new_pass: " + new_pass);
   console.log("\nnew_pass_2: " + new_pass_2);
   console.log("\nNombre: " + name);
-  
+
   if(new_pass == new_pass_2){
-    
+
     User.findOne({'email': name}, function(err, user){
       // encripta ok
       var hash_2 = bcrypt.hashSync(new_pass);
@@ -276,7 +275,7 @@ app.post('/login/password', function(req, res, next) {
       user.password = hash_2;
       user.save(function(err) {
         if (err) throw err;
-        
+
         console.log("\n\nModificada contraseña: "+ user)
       });
   //     /// bueno///
@@ -297,12 +296,12 @@ app.post('/login/password', function(req, res, next) {
     // });
     });
     res.redirect('/login');
-    
+
   }
      else
-     
+
        res.redirect('/err');
-     
+
 });
 
 // app.get('/loginSuccess', function(req, res, next) {
@@ -570,7 +569,3 @@ module.exports = app;
 // app.use(passport.initialize());
 // app.use(passport.session());
 // // ###
-
-
-
-
