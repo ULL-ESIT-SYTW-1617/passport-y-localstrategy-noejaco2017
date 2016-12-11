@@ -94,7 +94,7 @@ function datos_usuario_token(directorio){
                 name: 'token_dropbox',
                 require: true
             },{
-                name: 'ruta_dropbox',
+                name: 'fich_dropbox',
                 require: true
 
             }], function (err, result) {
@@ -103,32 +103,32 @@ function datos_usuario_token(directorio){
             //
             console.log('  nombre: ' + result.nombre_app);
             console.log('  token: ' + result.token_app);
-            console.log('  token_dropbox: ' + result.token_dropbox);
-            console.log('  ruta_dropbox: ' + result.ruta_dropbox);
+            console.log('  token de dropbox: ' + result.token_dropbox);
+            console.log('  fichero de config de dropbox: ' + result.fich_dropbox);
             // console.log('  secret_client: ' + result.secret_client);
             // console.log('  organizacion ' + result.organizacion);
 
             //variable con el contenido de config.json
             var heroku_config = '{\n "Heroku":{\n\t"nombre_app": "'+result.nombre_app+'",\n\t "token_app": "'+result.token_app+'"\n\t}\n}';
-            var dropbox_config = '{\n "Config":{\n\t"token_dropbox": "'+result.nombre_app+'",\n\t "ruta_dropbox": "'+result.ruta_dropbox+'"\n\t}\n}';
+            var dropbox_config = '{\n "Config":{\n\t"token_dropbox": "'+result.token_dropbox+'",\n\t "ruta_dropbox": "'+result.fich_dropbox+'"\n\t}\n}';
 
 
             fs.mkdirSync(path.join(process.cwd(), ".token_heroku"));
             fs.writeFileSync(path.join(process.cwd(),".token_heroku","token.json"),heroku_config);
-            fs.writeFileSync(path.join(process.cwd()+"/"+directorio,"dropbox.json"),dropbox_config);
+            fs.writeFileSync(path.join(process.cwd(),".dropbox.json"),dropbox_config);
 
             var token = require(path.join(process.cwd(), ".token_heroku","token.json"));
             var pack= require(path.join(process.cwd(), 'package.json'));
 
             var her = new heroku({ token : token.Heroku.token_app });
 
-                //her.post('/apps', {body: {name: token.Heroku.nombre_app}} ).then(app => {
+                her.post('/apps', {body: {name: token.Heroku.nombre_app}} ).then(app => {
 
                     //git.init().addRemote('heroku', result.repositorio).add('.').commit('Primer commit').push('heroku','master');
 
 
 
-                //});
+                });
 
           });
 
