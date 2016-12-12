@@ -12,7 +12,9 @@ var DropboxStrategy = require('passport-dropbox').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
 var bcrypt = require("bcrypt-nodejs");
 //const mongoose = require('mongoose');
-
+var fs = require('fs');
+var Dropbox = require('dropbox');
+var node_dropbox = require("node-dropbox");
 //*********************************************************
 var github = require('octonode');
 var url=require('url');
@@ -108,61 +110,62 @@ passport.deserializeUser(function(user, done) {
 
 
 
+var datos_dropbox= require(path.resolve(process.cwd(),".dropbox.json"));
+var api = node_dropbox.api(datos_dropbox.Config.token_dropbox);
 
 
-passport.use(new LocalStrategy(function(username, password, done) {
-process.nextTick(function() {
+passport.use(new LocalStrategy(function(username, password, done, err) {
+    process.nextTick(function() {
     //   // Auth Check Logic
       console.log("LLEGAMOS A LA FUNCION LOCAL");
-    //   console.log("USERNAME"+username);
-    //   console.log("PASS"+password);
-    //    //console.log("USER"+User+"\n");
-    //
-    //   // Buscamos por el email para ver si existe
-    //
-    //     User.findOne({ 'email' :  username }, function(err, user) {
-    //       console.log("Usuario dentro de findone: "+user);
-    //       // console.log("Entramos a buscar usuario -> "+ user.email || '');
-    //       //   console.log("Entramos a buscar usuario y su password en mongo es -> "+ user.password || '');
-    //         if (err){
-    //           console.log("Ha ocurrido un error");
-    //             return done(err);
-    //         }
-    //         // check to see if theres already a user with that email
-    //         if (!user) {
-    //           // return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
-    //           console.log("EL USUARIO NO EXISTE EN MONGO");
-    //                 // else {
-    //
-    //               //   //Creamos un nuevo usuario
-    //               //     var newUser = new User();
-    //
-    //
-    //               //     newUser.email = username;
-    //               //     newUser.password = newUser.generateHash(password);//Generamos la contraseña con bcryptnodejs
-    //
-    //               //     // save the user
-    //               //     newUser.save(function(err) {
-    //               //         if (err)
-    //               //             throw err;
-    //               //         return done(null, newUser);
-    //               //     });
-    //               // }
-    //           return done(null,false);
-    //
-    //         }
-    //         // var ra=  bcrypt.compareSync(password, user.password);;
-    //         // console.log("RA"+ra);
-    //         // console.log("PASSWORD "+password);
-    //         if (!user.validPassword(password)) {
-    //           console.log("LA CONTRASEÑA NO COINCIDE");
-    //           return done(null, false);
-    //         }
-    //       console.log("EL USUARIO EXISTE Y TODO HA IDO CORRECTO");
-    //       return done(null, user);
-    //     });
-    //
-     });
+      console.log("NOMBRE"+username+"PASS"+password);
+      //Generamos en la app de dropbox el fichero que hemos pasado anteriormente por parametros
+      fs.readFile(path.join(process.cwd(),'usuarios.json'), (err, data) => {
+                if(err) throw err;
+                var dbx = new Dropbox({ accessToken: datos_dropbox.Config.token_dropbox });
+                dbx.filesUpload({path: '/'+datos_dropbox.Config.ruta_dropbox+'.json', contents: data})
+        		.then(function(response){
+                console.log("fichero subido correctamente"+response);
+	               return response;
+        		}).catch(function(err){
+        			console.log("No se ha subido correctamente la bd al dropbox. Error:"+err);
+        			throw err;
+        		  })
+            });
+
+
+
+            api.getFile('/'+datos_dropbox.Config.ruta_dropbox+'.json', (err,response,body) => {
+              console.log("BODY"+body+"RESPONS"+response)
+              var existe = false;
+              var j;
+              var hash;
+
+              for(var i=0; i< body.length;i++){
+                 if(username === body[i].usuario){
+                   existe = true;
+                   console.log(existe);
+                   j = i;
+                   console.log(i)
+                 }
+               }
+
+                if(!existe)
+                  return done(null,false);
+
+                var pass_encritada = bcrypt.compareSync(password, body[j].pass);
+
+
+                //if(hash === body[j].pass)
+                if(pass_encritada)
+                    return done(null, username);
+                else
+                   return done(null,false);
+
+
+           });
+    });
+
 }));
 
 
@@ -340,7 +343,7 @@ var addr = `${ip}:${port}`;
 
 
 app.listen(port,ip,function(){
-    console.log(`chat server listening at ${addr,ip}`);
+    console.log(`chat server listening at ${port}`);
 });
 
 
