@@ -18,6 +18,7 @@ var node_dropbox = require("node-dropbox");
 //*********************************************************
 var github = require('octonode');
 var url=require('url');
+var config = require(path.resolve(process.cwd(),".dropbox.json"));
 
 //#################### LOCAL STRATEGY WITH DROPBOX
 app.set('views', __dirname + '/views');
@@ -111,10 +112,10 @@ passport.deserializeUser(function(user, done) {
 
 
 var datos_dropbox= require(path.resolve(process.cwd(),".dropbox.json"));
-var api = node_dropbox.api(datos_dropbox.Config.token_dropbox);
 
 
-passport.use(new LocalStrategy(function(username, password, done, err) {
+
+passport.use(new LocalStrategy(function(username, password, cb, err) {
     process.nextTick(function() {
     //   // Auth Check Logic
       console.log("LLEGAMOS A LA FUNCION LOCAL");
@@ -133,36 +134,50 @@ passport.use(new LocalStrategy(function(username, password, done, err) {
         		  })
             });
 
+            console.log("PATH"+datos_dropbox);
+
+            var api = node_dropbox.api(datos_dropbox.Config.token_dropbox);
+
+
+            //
+            // api.account('/'+datos_dropbox.Config.ruta_dropbox+'.json',function(err, res, body) {
+	          //      console.log("\n\n BODY    ->"+body);
+            // });
+
+
 
 
             api.getFile('/'+datos_dropbox.Config.ruta_dropbox+'.json', (err,response,body) => {
+
               console.log("BODY"+body+"RESPONS"+response)
+              //console.log("B"+body.length);
+              ////////////////////////////////////////////////////////////////////////////BIDY PROBLEM
+              console.log("R"+response.lenght);
+
               var existe = false;
               var j;
               var hash;
 
-              for(var i=0; i< body.length;i++){
+              for(var i=0; i< response.length;i++){
                  if(username === body[i].usuario){
+                   console.log("LLega a user"+username);
                    existe = true;
                    console.log(existe);
                    j = i;
-                   console.log(i)
+                   console.log("i"+i)
                  }
                }
 
-                if(!existe)
-                  return done(null,false);
-
-                var pass_encritada = bcrypt.compareSync(password, body[j].pass);
-
-
-                //if(hash === body[j].pass)
-                if(pass_encritada)
-                    return done(null, username);
-                else
-                   return done(null,false);
-
-
+                if(!existe){
+                console.log("No existe");
+                  return cb(null,false);
+                }
+                var pass_encriptada = bcrypt.compareSync(password, body[j].pass);
+                if(pass_encriptada){
+                    return cb(null, username);
+                }else{
+                   return cb(null,false);
+               }
            });
     });
 
@@ -195,20 +210,73 @@ app.get('/registro',
 
 app.post('/registro', function(req, res, next){
 
-  var pssw = req.body.password_reg;
-  var name = req.body.username_reg;
+   var pass = req.body.password_reg;
+   var user = req.body.username_reg;
+  //
+  // ////////////////////
+  // var newUser = new User();
+  // newUser.email = name;
+  // newUser.password = newUser.generateHash(pssw);//Generamos la contraseña con bcryptnodejs
+  //
+  // newUser.save(function(err) {
+  //     if (err)
+  //         throw err;
+  // });
+  //
+  // res.redirect('/login');
+console.log("registro pass"+pass);
+console.log("name"+user);
+  var existe= false;
+  var j;
 
-  ////////////////////
-  var newUser = new User();
-  newUser.email = name;
-  newUser.password = newUser.generateHash(pssw);//Generamos la contraseña con bcryptnodejs
 
-  newUser.save(function(err) {
-      if (err)
-          throw err;
-  });
 
-  res.redirect('/login');
+
+  // var user = req.query.username;
+  // var pass = req.query.password;
+  var contenido;
+  var hash = bcrypt.hashSync(pass);
+
+
+  var bbdd_dropbox = `[
+                    {
+                    "usuario":" `+user+`",
+                    "pass": "`+hash+`"
+                    }
+                    ]`;
+
+
+
+  //var pass_encritada = bcrypt.compareSync(pass, hash);
+  //console.log("Usuario!!!!!!!!!!!!!!!  "+ user );
+  console.log("Contraseñaa!!!!!!!!!!  "+ hash);
+ var api = node_dropbox.api(datos_dropbox.Config.token_dropbox);
+  api.getFile('/'+config.Config.ruta_dropbox+'.json', (err,response,body) => {
+      console.log("entro a buscar fichero");
+      console.log("res"+response);
+      console.log("body"+body);
+        for(var i=0; i<response.length;i++){
+           if(user === response[i].usuario){
+              response[i].pass = hash;
+           }
+         }
+        console.log("FUERA FOR");
+
+
+
+        contenido= JSON.stringify(response,null,' ');
+        console.log("CONTNEIDO"+contenido)
+
+      api.removeFile('/'+config.Config .ruta_dropbox+'.json', function(err, response, body){
+        console.log("FICHERO DROP TOKEN"+config);
+        console.log("config_token"+config.Config.token_dropbox);
+        var  dbx = new Dropbox({ accessToken: config.Config.token_dropbox });
+        dbx.filesUpload({path: '/'+config.Config.ruta_dropbox+'.json', contents: bbdd_dropbox});
+        res.redirect('/home')
+      })
+    });
+
+
   ////////////////////
   // var hash = User.userSchema.methods.generateHash(pssw);
   // console.log("\n\n Hash GENERADO: "+hash)
@@ -238,8 +306,9 @@ app.post('/registro', function(req, res, next){
 // );
 
 app.post('/login',
-  passport.authenticate('local', { failureRedirect: '/login' }),
+  passport.authenticate('local', { failureRedirect: '/err' }),
   function(req, res) {
+    console.log("LOG DESPUES DE AYTENTICAR");
     //console.log("USHARIOOO"+req.user);
     res.redirect('/');
   });
@@ -253,57 +322,74 @@ app.get('/login/password', function(req, res, next) {
 });
 
 app.post('/login/password', function(req, res, next) {
-  var new_pass = req.body.password_new;
-  var new_pass_2 = req.body.password_new_2;
-  var name = req.body.username;
 
-  console.log("Estamos en /login/password:::\n");
-  console.log("new_pass: " + new_pass);
-  console.log("\nnew_pass_2: " + new_pass_2);
-  console.log("\nNombre: " + name);
+  var existe= false;
+    var j;
 
-  if(new_pass == new_pass_2){
+    var user = req.query.username;
+    var pass = req.query.password;
+    var contenido;
 
-    User.findOne({'email': name}, function(err, user){
-      // encripta ok
-      var hash_2 = bcrypt.hashSync(new_pass);
-      console.log("\n\nContraseña antigua: "+ user.password);
-      console.log("\n\nContraseña antigua hasheada antes update: "+ hash_2);
-      // var _id = user._id;
-      // console.log("\n\nUser_id: "+_id);
-      // var hash_2 = user.generateHash(new_pass);
-      if (err){
-        res.redirect('/err');
-      }
-      user.password = hash_2;
-      user.save(function(err) {
-        if (err) throw err;
+    var hash = bcrypt.hashSync(pass);
+    //var pass_encritada = bcrypt.compareSync(pass, hash);
+    //console.log("Usuario!!!!!!!!!!!!!!!  "+ user );
+   // console.log("Contraseñaa!!!!!!!!!!  "+ hash);
 
-        console.log("\n\nModificada contraseña: "+ user)
+    api.getFile('/'+config.ruta_dropbox+'.json', (err,response,body) => {
+
+          for(var i=0; i<body.length;i++){
+             if(user === body[i].usuario){
+                body[i].pass = hash;
+             }
+           }
+          console.log(body)
+          contenido= JSON.stringify(body,null,' ');
+          console.log(contenido)
+
+        api.removeFile('/'+config.ruta_dropbox+'.json', function(err, response, body){
+
+          var  dbx = new Dropbox({ accessToken: config.token_dropbox });
+          dbx.filesUpload({path: '/'+config.ruta_dropbox+'.json', contents: contenido});
+          res.redirect('/home')
+        })
       });
-  //     /// bueno///
-  //     User.findOneAndUpdate({ username: name }, { password: hash_2 }, function(err, user) {
-  // if (err) throw err;
 
-  // // we have the updated user returned to us
-  // console.log(user);
-// });
-/////////////
-    //   User.db.lista_usuarios.update(
-    //     {'_id': _id},
-    //     {"$set":{'password': hash_2}});
-    //     console.log("\n\nNueva CONTRASEÑA: "+ user.password);
-    //     res.redirect('/login');
-    // });
-    // user.password = hash_2;
-    // });
-    });
-    res.redirect('/login');
-
-  }
-     else
-
-       res.redirect('/err');
+  // var new_pass = req.body.password_new;
+  // var new_pass_2 = req.body.password_new_2;
+  // var name = req.body.username;
+  //
+  // console.log("Estamos en /login/password:::\n");
+  // console.log("new_pass: " + new_pass);
+  // console.log("\nnew_pass_2: " + new_pass_2);
+  // console.log("\nNombre: " + name);
+  //
+  // if(new_pass == new_pass_2){
+  //
+  //   User.findOne({'email': name}, function(err, user){
+  //     // encripta ok
+  //     var hash_2 = bcrypt.hashSync(new_pass);
+  //     console.log("\n\nContraseña antigua: "+ user.password);
+  //     console.log("\n\nContraseña antigua hasheada antes update: "+ hash_2);
+  //     // var _id = user._id;
+  //     // console.log("\n\nUser_id: "+_id);
+  //     // var hash_2 = user.generateHash(new_pass);
+  //     if (err){
+  //       res.redirect('/err');
+  //     }
+  //     user.password = hash_2;
+  //     user.save(function(err) {
+  //       if (err) throw err;
+  //
+  //       console.log("\n\nModificada contraseña: "+ user)
+  //     });
+  //
+  //   });
+  //   res.redirect('/login');
+  //
+  // }
+  //    else
+  //
+  //      res.redirect('/err');
 
 });
 
