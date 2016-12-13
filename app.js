@@ -111,7 +111,7 @@ passport.deserializeUser(function(user, done) {
 
 
 
-var datos_dropbox= require(path.resolve(process.cwd(),".dropbox.json"));
+//var datos_dropbox= require(path.resolve(process.cwd(),".dropbox.json"));
 
 
 
@@ -121,23 +121,23 @@ passport.use(new LocalStrategy(function(username, password, cb, err) {
       console.log("LLEGAMOS A LA FUNCION LOCAL");
       console.log("NOMBRE"+username+"PASS"+password);
       //Generamos en la app de dropbox el fichero que hemos pasado anteriormente por parametros
-      fs.readFile(path.join(process.cwd(),'usuarios.json'), (err, data) => {
-                if(err) throw err;
-                var dbx = new Dropbox({ accessToken: datos_dropbox.Config.token_dropbox });
-                dbx.filesUpload({path: '/'+datos_dropbox.Config.ruta_dropbox+'.json', contents: data})
-        		.then(function(response){
-                console.log("fichero subido correctamente"+response);
-	               return response;
-        		}).catch(function(err){
-        			console.log("No se ha subido correctamente la bd al dropbox. Error:"+err);
-        			throw err;
-        		  })
-            });
+      // fs.readFile(path.join(process.cwd(),'usuarios.json'), (err, data) => {
+      //           if(err) throw err;
+      //           var dbx = new Dropbox({ accessToken: config.Config.token_dropbox });
+      //           dbx.filesUpload({path: '/'+config.Config.ruta_dropbox+'.json', contents: data})
+      //   		.then(function(response){
+      //           console.log("fichero subido correctamente"+response);
+	    //            return response;
+      //   		}).catch(function(err){
+      //   			console.log("No se ha subido correctamente la bd al dropbox. Error:"+err);
+      //   			throw err;
+      //   		  })
+      //       });
 
-            console.log("PATH"+datos_dropbox);
+            //console.log("PATH"+datos_dropbox);
 
-            var api = node_dropbox.api(datos_dropbox.Config.token_dropbox);
-
+            //var api = node_dropbox.api(config.Config.token_dropbox);
+            var api = node_dropbox.api(config.Config.token_dropbox);
 
             //
             // api.account('/'+datos_dropbox.Config.ruta_dropbox+'.json',function(err, res, body) {
@@ -147,18 +147,18 @@ passport.use(new LocalStrategy(function(username, password, cb, err) {
 
 
 
-            api.getFile('/'+datos_dropbox.Config.ruta_dropbox+'.json', (err,response,body) => {
+            api.getFile('/'+config.Config.ruta_dropbox+'.json', (err,response,body) => {
 
               console.log("BODY"+body+"RESPONS"+response)
               //console.log("B"+body.length);
               ////////////////////////////////////////////////////////////////////////////BIDY PROBLEM
-              console.log("R"+response.lenght);
+              console.log("body lenght"+body.lenght);
 
               var existe = false;
               var j;
               var hash;
 
-              for(var i=0; i< response.length;i++){
+              for(var i=0; i< body.length;i++){
                  if(username === body[i].usuario){
                    console.log("LLega a user"+username);
                    existe = true;
@@ -212,18 +212,7 @@ app.post('/registro', function(req, res, next){
 
    var pass = req.body.password_reg;
    var user = req.body.username_reg;
-  //
-  // ////////////////////
-  // var newUser = new User();
-  // newUser.email = name;
-  // newUser.password = newUser.generateHash(pssw);//Generamos la contraseña con bcryptnodejs
-  //
-  // newUser.save(function(err) {
-  //     if (err)
-  //         throw err;
-  // });
-  //
-  // res.redirect('/login');
+
 console.log("registro pass"+pass);
 console.log("name"+user);
   var existe= false;
@@ -234,67 +223,48 @@ console.log("name"+user);
 
   // var user = req.query.username;
   // var pass = req.query.password;
-  var contenido;
+
   var hash = bcrypt.hashSync(pass);
 
 
-  var bbdd_dropbox = `[
+  var new_user_bbdd_dropbox = `[
                     {
-                    "usuario":" `+user+`",
+                    "usuario":"`+user+`",
                     "pass": "`+hash+`"
                     }
                     ]`;
 
 
 
-  //var pass_encritada = bcrypt.compareSync(pass, hash);
-  //console.log("Usuario!!!!!!!!!!!!!!!  "+ user );
-  console.log("Contraseñaa!!!!!!!!!!  "+ hash);
- var api = node_dropbox.api(datos_dropbox.Config.token_dropbox);
+
+  console.log("Contraseñaa cifrada!!!!!!!!!!  "+ hash);
+ var api = node_dropbox.api(config.Config.token_dropbox);
   api.getFile('/'+config.Config.ruta_dropbox+'.json', (err,response,body) => {
       console.log("entro a buscar fichero");
       console.log("res"+response);
       console.log("body"+body);
-        for(var i=0; i<response.length;i++){
-           if(user === response[i].usuario){
-              response[i].pass = hash;
+        for(var i=0; i<body.length;i++){
+           if(user === body[i].usuario){
+              body[i].pass = hash;
            }
          }
         console.log("FUERA FOR");
 
 
 
-        contenido= JSON.stringify(response,null,' ');
-        console.log("CONTNEIDO"+contenido)
+        var contenido= JSON.stringify(body,null,' ');
+        contenido = contenido.concat(new_user_bbdd_dropbox);
+        //console.log("CONTNEIDO"+contenido)
 
       api.removeFile('/'+config.Config .ruta_dropbox+'.json', function(err, response, body){
         console.log("FICHERO DROP TOKEN"+config);
         console.log("config_token"+config.Config.token_dropbox);
         var  dbx = new Dropbox({ accessToken: config.Config.token_dropbox });
-        dbx.filesUpload({path: '/'+config.Config.ruta_dropbox+'.json', contents: bbdd_dropbox});
-        res.redirect('/home')
+        dbx.filesUpload({path: '/'+config.Config.ruta_dropbox+'.json', contents: contenido});
+        res.redirect('/')
       })
     });
 
-
-  ////////////////////
-  // var hash = User.userSchema.methods.generateHash(pssw);
-  // console.log("\n\n Hash GENERADO: "+hash)
-  //   var user_prueba = new User({
-  //       "email": name,
-  //       "password": hash
-
-  //   });
-
-  // var user_reg = user_prueba.save(function (err) {
-  //   if (err) { console.log(`Hubieron errores al guardar user:\n${err}`); return err; }
-  //   console.log(`Usuario guardado desde REGISTRO: ${user_prueba}`);
-  // });
-
-  // Promise.all([user1], [user2]).then( function(value){
-  //   console.log(util.inspect(value, {depth: null}));
-  //   //mongoose.connection.close();
-  // });
 });
 
 // app.post('/login',
@@ -350,7 +320,7 @@ app.post('/login/password', function(req, res, next) {
 
           var  dbx = new Dropbox({ accessToken: config.token_dropbox });
           dbx.filesUpload({path: '/'+config.ruta_dropbox+'.json', contents: contenido});
-          res.redirect('/home')
+          res.redirect('/')
         })
       });
 
@@ -418,7 +388,38 @@ app.get('/profile',
     res.render('profile',{id: req.user._id, username: req.user.email});
 });
 //app.get('/profile', passport.authenticationMiddleware(), renderProfile)
+app.post('/cambio_pass',function(req,res,next){
+  var existe= false;
+  var j;
 
+  var user = req.query.username;
+  var pass = req.query.password;
+
+
+  var hash = bcrypt.hashSync(pass);
+  //var pass_encritada = bcrypt.compareSync(pass, hash);
+  //console.log("Usuario!!!!!!!!!!!!!!!  "+ user );
+ // console.log("Contraseñaa!!!!!!!!!!  "+ hash);
+
+  api.getFile('/'+config.Config.ruta_dropbox+'.json', (err,response,body) => {
+
+        for(var i=0; i<body.length;i++){
+           if(user === body[i].usuario){
+              body[i].pass = hash;
+           }
+         }
+        console.log(body)
+        var json= JSON.stringify(body,null,' ');
+        console.log(json);
+
+      api.removeFile('/'+config.config.ruta_dropbox+'.json', function(err, response, body){
+
+        var  dbx = new Dropbox({ accessToken: config.Config.token_dropbox });
+        dbx.filesUpload({path: '/'+config.Config.ruta_dropbox+'.json', contents: contenido});
+        res.redirect('/')
+      })
+    });
+});
 
 
 var port = process.env.PORT || 8080;
